@@ -1,0 +1,6 @@
+{
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportPrivateImportUsage": false
+  },
+  "python.analysis.autoImportCompletions": true
+}
