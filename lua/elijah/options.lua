@@ -24,16 +24,17 @@ local function get_python_path()
   if vim.fn.filereadable(pyproject_path) == 1 then
     local venv_path = vim.fn.trim(vim.fn.system('poetry env info --path 2>/dev/null'))
     if vim.fn.empty(venv_path) == 0 then
-      return venv_path .. '/bin/python' -- Path to Python inside the Poetry virtual environment
+      return venv_path .. '/bin/python3' -- Path to Python inside the Poetry virtual environment
     end
   end
   -- Fallback to system Python
-  return vim.fn.trim(vim.fn.system('which python'))
+  return vim.fn.trim(vim.fn.system('which python3'))
 end
 -- Assign the Python path to a variable
 local python_path = get_python_path()
 
 local dap = require('dap')
+
 dap.adapters.python = {
   type = 'executable',
   command = python_path,
@@ -46,30 +47,19 @@ dap.configurations.python = {
     request = 'launch',
     name = 'Launch file',
     program = '${file}', -- This will launch the current file
-    pythonPath = function()
-      return get_python_path()
-    end,
-    cwd = vim.fn.getcwd(),
+    pythonPath = python_path,
+    cwd = vim.fn.expand('%:p:h'),
     env = {
-      PYTHONPATH = vim.fn.getcwd(),
+      PYTHONPATH = vim.fn.expand('%:p:h'),
+      DAP_DEBUG = 'true',
+      DEBUGPY_LOG_FILE = '/home/i.adamovich@maxbit.local/.cache/lvim/dap.log',
     },
   },
 }
+
 vim.opt.relativenumber = true
 vim.opt.autoindent = true
 vim.opt.errorbells = true
-
--- FOLDS
--- vim.opt.foldmethod = "expr"
--- vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
--- vim.opt.foldcolumn = "1"
--- vim.opt.foldtext = ""
--- vim.opt.foldlevel = 99
--- vim.opt.foldlevelstart = 1
--- vim.opt.foldnestmax = 4
-
-
-lvim.builtin.lualine.sections.lualine_c = { "branch" }
 
 local formatters = require "lvim.lsp.null-ls.formatters"
 formatters.setup { { name = "autopep8" } }
